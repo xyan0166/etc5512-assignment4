@@ -1,0 +1,217 @@
+---
+title: "Agencies from the FBI Crime Data API"
+subtitle: "Assignment 4 ETC5512"
+author: "Xinran Yang"
+format: html
+editor: visual
+---
+
+::: panel-tabset
+<!-- Task 1 Tab: Data and Documenting -->
+
+## Data and Documenting
+
+#### Question 1
+
+My question is going to be about understanding the geographic distribution of crime occurrences based on state agency agent data. At the same time, investigate what percentage of agencies in each state participate in NIBRS reporting and what trends are occurring in NIBRS adoption.Crime data changes rapidly on a daily basis and the mobility of crime can be reflected through this dataset.
+
+#### Question 2
+
+**Data Description**
+
+The data for this analysis comes from the FBI Crime Data API compiled in tidytuesday. there is agency-level data for all 50 U.S. states. The dataset provides detailed information on law enforcement agencies that have submitted data to the FBI's Uniform Crime Reporting (UCR) programme and are displayed on the Crime Data Explorer (CDE).
+
+#### Question 3
+
+**readme**
+
+`Author`: Xinran Yang
+
+`Data Source`: Official API interface from FBI Crime Data Explorer, collected and maintained by the Federal Bureau of Investigation (FBI).
+
+`Data Type`: administrative census.
+
+`Source Description`: The file `aencies.csv` is published by the TidyTuesday community and contains basic information about U.S. law enforcement agencies and their participation in the National Incident Based Reporting System (NIBRS).
+
+`Licience`: CC0 1.0 Universal Public Domain Dedication. <https://github.com/rfordatascience/tidytuesday/blob/main/data/2025/2025-02-18/readme.md>
+
+**Data privacy**
+
+-   This dataset contains no personal, case details or identifying information and is entirely agency-level data with no privacy implications.
+
+-   The data is provided through the U.S. governments open platform API, which belongs to the public resources, and is used legally and without copyright issues。
+
+**Ethical Considerations**
+
+-   Oversimplifying the interpretation of the social significance of law enforcement data
+
+-   Making a direct correlation between agency participation in NIBRS and the quality of law enforcement.
+
+-   Omitting a misunderstanding of the reasons for missing data.
+
+**data dictionary**
+
+```{r}
+library(kableExtra)
+library(dplyr)
+library(knitr)
+df<-data.frame(
+  Variable = c("ori", "county", "latitude", 
+               "longitude","state_abbr",
+               "state","agency_name",
+               "agency_type","is_nibrs",
+               "nibrs_start_date"),
+  Type = c("character", "character", 
+           "double", "double",
+           "character", "character", 
+           "character", "character", 
+           "logical","character"),
+  Description = c(
+    "Unique ID used to identify an agency.",
+    "The county associated with the agency’s jurisdiction within a state.",
+    "The approximate latitude of the agency.",
+    "The approximate longitude of the agency.",
+    "The abbreviated two letter state code for the agency's location.",   
+    "The full name of the state where the agency is located.",
+    "The official name of the agency.",
+    "The type or category of the agency, such as city or county.",
+    "Indicates whether the agency participates in the FBI’s National Incident-Based Reporting System (NIBRS).",
+    "The date on which the agency began reporting data to NIBRS."
+  )
+) 
+kable(df, caption = "Table 1: Data Dictionary for Agencies Dataset") %>%
+  kable_styling(full_width = FALSE)
+```
+
+#### Question 4
+
+```{r}
+# Download dataset
+library(readr)
+library(httr2)    
+library(jsonlite) 
+library(dplyr)    
+library(purrr)
+## 1. Get a FBI Crime Data API Key from the docs here: https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/docApi
+## 2. Set an environment variable via
+## 3. Run the script which will access your environment variable via
+state_abbrs <- c(
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+)
+api_key <- "1HCS2tzlqdkThSAEbVq9nfNZDaCB7xo9Lia43fs9"
+parse_nibrs_date <- function(date_val) {
+  if (is.null(date_val)) {
+    NA_character_
+  } else if (is.list(date_val)) {
+    if (length(date_val) > 0) as.character(date_val[[1]]) else NA_character_
+  } else {
+    as.character(date_val)
+  }
+}
+
+fetch_agency_data <- function(state_abbr, api_key) {
+  url <- sprintf(
+    "https://api.usa.gov/crime/fbi/cde/agency/byStateAbbr/%s?API_KEY=%s",
+    state_abbr, api_key
+  )
+ response_text <- request(url) %>%
+    req_perform() %>%
+    resp_body_string()
+
+  agency_data <- fromJSON(response_text, flatten = TRUE)
+
+  agency_df <- if (is.data.frame(agency_data)) {
+    agency_data
+  } else if (is.list(agency_data)) {
+    bind_rows(agency_data)
+  } else {
+    stop("Unexpected JSON structure: not a list or data frame.")
+  }
+
+  if ("nibrs_start_date" %in% names(agency_df)) {
+    agency_df <- agency_df %>%
+      mutate(nibrs_start_date = map_chr(nibrs_start_date, parse_nibrs_date))
+  } else {
+    agency_df$nibrs_start_date <- NA_character_
+  }
+
+  agency_df$state <- state_abbr
+
+  agency_df
+}
+
+agency_data_list <- list()
+qa_data_list <- list()
+
+for (state in state_abbrs) {
+  cat("Fetching data for state:", state, "\n")
+
+  state_agency_df <- fetch_agency_data(state, api_key)
+
+  agency_data_list[[state]] <- state_agency_df
+
+  qa_data_list[[state]] <- tibble(
+    state = state,
+    response_length = nrow(state_agency_df)
+  )
+}
+
+agencies <- bind_rows(agency_data_list) |>
+  mutate(agency_type = agency_type_name, county = counties, state = state_name) |>
+  select(ori, county, latitude, longitude, state_abbr, state, agency_name, agency_type, is_nibrs, nibrs_start_date)
+# QA checks
+response_qa <- bind_rows(qa_data_list)
+
+agencies_qa <- agencies %>%
+  group_by(state) %>%
+  summarise(n_ori = n_distinct(ori), .groups = "drop")
+
+qa_comparison <- inner_join(response_qa, agencies_qa, by = "state") %>%
+  mutate(match = response_length == n_ori) %>%
+  filter(match != TRUE)
+
+print(qa_comparison)
+
+# Data cleansing and checking
+library(dplyr)
+library(lubridate)
+## Create a new variable: NIBRS start-up year
+agencies <- agencies %>%
+  mutate(nibrs_year = year(nibrs_start_date))
+head(agencies)
+
+```
+
+<!-- Task 2 Tab: Writing your blogpost -->
+
+## Blog post
+
+### What's in this section
+
+Here is where you should write your blogpost! (Task 2)
+
+### Blogpost Structure
+
+There is no strict structure for you to follow. However, here is a skeleton structure you may find helpful.
+
+1.  Title (is set at the top of this document)
+2.  Motivation\
+3.  Data\
+4.  Analysis\
+5.  Conclusions\
+6.  References
+
+<!-- Task 3 Tab: Behind the Scenes -  -->
+
+## Behind the Scenes
+
+### What's in this section
+
+Here is where you should tell us about your reflection on your analysis (Task 3).
+
+Again, these are the details about **your** perspective and the gritty details behind the scenes of your analysis.
+:::
