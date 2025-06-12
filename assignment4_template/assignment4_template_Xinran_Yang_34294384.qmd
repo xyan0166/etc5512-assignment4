@@ -19,11 +19,11 @@ My question is going to be about understanding the geographic distribution of cr
 
 **Data Description**
 
-The data for this analysis comes from the FBI Crime Data API compiled in tidytuesday. there is agency-level data for all 50 U.S. states. The dataset provides detailed information on law enforcement agencies that have submitted data to the FBI's Uniform Crime Reporting (UCR) programme and are displayed on the Crime Data Explorer (CDE).
+The data for this analysis comes from the FBI Crime Data API compiled in `tidytuesday`. there is agency-level data for all 50 U.S. states. The dataset provides detailed information on law enforcement agencies that have submitted data to the FBI Uniform Crime Reporting (UCR) program and are displayed on the Crime Data Explorer (CDE).
 
 #### Question 3
 
-**readme**
+**Readme**
 
 `Author`: Xinran Yang
 
@@ -60,12 +60,13 @@ df<-data.frame(
                "longitude","state_abbr",
                "state","agency_name",
                "agency_type","is_nibrs",
-               "nibrs_start_date"),
+               "nibrs_start_date","nibrs_year"),
   Type = c("character", "character", 
            "double", "double",
            "character", "character", 
            "character", "character", 
-           "logical","character"),
+           "logical","character",
+           "double"),
   Description = c(
     "Unique ID used to identify an agency.",
     "The county associated with the agency’s jurisdiction within a state.",
@@ -76,7 +77,8 @@ df<-data.frame(
     "The official name of the agency.",
     "The type or category of the agency, such as city or county.",
     "Indicates whether the agency participates in the FBI’s National Incident-Based Reporting System (NIBRS).",
-    "The date on which the agency began reporting data to NIBRS."
+    "The date on which the agency began reporting data to NIBRS.",
+    "The year on which the agency began reporting data to NIBRS"
   )
 ) 
 kable(df, caption = "Table 1: Data Dictionary for Agencies Dataset") %>%
@@ -186,17 +188,42 @@ head(agencies)
 
 ```
 
+I have chosen not to store the data locally, because it can be downloaded easily provided there is an internet connection.
+
+#### Reference
+
+-   Ford Johnson. (2025). *tidytuesday/data/2025/2025-02-18/readme.md at main · rfordatascience/tidytuesday*. GitHub. https://github.com/rfordatascience/tidytuesday/blob/main/data/2025/2025-02-18/readme.md?plain=1
+
+-   Grolemund, G., & Wickham, H. (2011). Dates and Times Made Easy withlubridate. *Journal of Statistical Software*, *40*(3). https://doi.org/10.18637/jss.v040.i03
+
+-   Ooms, J. (2014). The jsonlite Package: A Practical and Consistent Mapping Between JSON Data and R Objects. *ArXiv:1403.2805 \[Cs, Stat\]*. https://arxiv.org/abs/1403.2805
+
+-   Wickham, H. (2021). *httr2: Perform HTTP Requests and Process the Responses*. https://doi.org/10.32614/cran.package.httr2
+
+-   Wickham, H., François, R., Henry, L., & Müller, K. (2019). A Grammar of Data Manipulation \[R package dplyr version 0.8.3\]. *R-Project.org*. https://cran.r-project.org/package=dplyr
+
+-   Wickham, H., & Henry, L. (2023). Functional Programming Tools \[R package purrr version 1.0.2\]. *R-Project.org*, *R package version 1.0.4*. https://cran.r-project.org/package=purrr
+
+-   Wickham, H., Hester, J., & Bryan, J. (2021). *Read Rectangular Text Data \[R package readr version 2.0.1\]*. Cran.r-Project.org. https://cran.r-project.org/package=readr
+
+-   Zhu, H. (2021). *Construct Complex Table with “kable” and Pipe Syntax \[R package kableExtra version 1.3.4\]*. Cran.r-Project.org. https://cran.r-project.org/package=kableExtra
+
+```{r}
+citation("kableExtra")
+citation("dplyr")
+citation("knitr")
+citation("readr")
+citation("httr2")
+citation("jsonlite")
+citation("purrr")
+citation("lubridate")
+```
+
 <!-- Task 2 Tab: Writing your blogpost -->
 
 ## Blog post
 
-### What's in this section
-
-Here is where you should write your blogpost! (Task 2)
-
 ### Blogpost Structure
-
-There is no strict structure for you to follow. However, here is a skeleton structure you may find helpful.
 
 1.  Title (is set at the top of this document)
 2.  Motivation\
