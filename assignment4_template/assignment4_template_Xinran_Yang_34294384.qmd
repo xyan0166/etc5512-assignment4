@@ -43,7 +43,7 @@ The data for this analysis comes from the FBI Crime Data API compiled in `tidytu
 
 **Ethical Considerations**
 
--   Oversimplifying the interpretation of the social significance of law enforcement data
+-   Oversimplifying the interpretation of the social significance of law enforcement data.
 
 -   Making a direct correlation between agency participation in NIBRS and the quality of law enforcement.
 
@@ -87,7 +87,7 @@ kable(df, caption = "Table 1: Data Dictionary for Agencies Dataset") %>%
 
 #### Question 4
 
-```{r}
+```{r results='hide'}
 # Download dataset
 library(readr)
 library(httr2)    
@@ -184,7 +184,6 @@ library(lubridate)
 ## Create a new variable: NIBRS start-up year
 agencies <- agencies %>%
   mutate(nibrs_year = year(nibrs_start_date))
-head(agencies)
 
 ```
 
@@ -208,7 +207,7 @@ I have chosen not to store the data locally, because it can be downloaded easily
 
 -   Zhu, H. (2021). *Construct Complex Table with “kable” and Pipe Syntax \[R package kableExtra version 1.3.4\]*. Cran.r-Project.org. https://cran.r-project.org/package=kableExtra
 
-```{r}
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 citation("kableExtra")
 citation("dplyr")
 citation("knitr")
@@ -223,14 +222,41 @@ citation("lubridate")
 
 ## Blog post
 
-### Blogpost Structure
+#### Introduction
 
-1.  Title (is set at the top of this document)
-2.  Motivation\
-3.  Data\
-4.  Analysis\
-5.  Conclusions\
-6.  References
+The United States has had a criminal record since its founding, and it has fluctuated greatly over time. Furthermore, as previously reported, crime rates in the United States can vary dramatically depending on geographic location, with some jurisdictions experiencing little to no serious crime and others (particularly those that are more industrialised) experiencing higher numbers.
+
+The two main sources of crime data in the United States are the Federal Bureau of Investigations (FBI) Uniform Crime Reports, which incorporate the eight types of crime recorded by law enforcement, and the Bureau of Justice Statistics (BJS) National Crime Victimisation Survey (NCVS). The primary source of data for this blog is the Uniform Crime Reports from FBI.
+
+#### Why Analyze Agencies from the FBI Crime Data?
+
+In recent years, security issues in the United States have received global attention. As a result, there has been public interest in assessing the quality, representativeness, and usefulness of national crime statistics by understanding the structure of law enforcement agencies and their participation in NIBRS. The blog hopes to use this dataset to interpret the data and to be able to identify and understand crime trends in the United States. In turn, the blog hopes to identify security barriers that hinder the development of modern American society.
+
+On a personal note, I had accidentally watched a vlog on Tiktok before that a vlogger visited one of the most dangerous area in the US and was assaulted in a neighbourhood in the US due to some unexpected incident. Meanwhile, I have been planning to travel to the United States, in order to protect my life during the trip, so I would like to know about the safety issues in the United States.
+
+### Where Can We Get Agencies from the FBI Crime Data?
+
+The FBI crime data can be accessed at [https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/docApi.](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/docApi网站进行抓取.) Below are some of the results of the data captured and subjected to data cleansing:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+head(agencies)
+```
+
+This data provides information on basic offence data, such as the county, agency, the type of agency, the date of recorded into NIBRS, etc.
+
+#### Data Analysis
+
+**Analysing the Geographic Distribution of Crime Incidents in the United States**
+
+```{r visualisation 1,echo=FALSE, warning=FALSE, message=FALSE}
+#| label: fig-1
+#| fig-cap: "Geographic Distribution of Crime Incidents in the United States"
+#| fig-pos: "H"
+
+```
+
+1.  Conclusions\
+2.  References
 
 <!-- Task 3 Tab: Behind the Scenes -  -->
 
